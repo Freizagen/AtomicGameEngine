@@ -168,7 +168,7 @@ namespace AtomicEditor
 
 				   cursorPosition_ = r.position_;
 				   float height = terrain_->GetHeight(Vector3(cursorPosition_.x_, cursorPosition_.y_, cursorPosition_.z_));
-				   brushcursornode_->SetPosition(Vector3(cursorPosition_.x_, height + 1, cursorPosition_.z_));
+				   brushcursornode_->SetPosition(Vector3(cursorPosition_.x_ + spacing_.x_, height + .1, cursorPosition_.z_ + spacing_.z_));
 				   brushcursornode_->SetEnabled(true);
 				   Octree* octree = scene_->GetComponent<Octree>();
 				   if (!octree)

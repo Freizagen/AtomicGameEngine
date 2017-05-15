@@ -158,17 +158,27 @@ namespace Atomic
 			return;
 
 		Viewport* viewport = r->GetViewport(0);
+		Node* camNode = 0;
+		Camera *cam = 0;
 		if (!viewport)
-			return;
+		{
+			camNode = node_->GetScene()->GetChild("__atomic_sceneview3d_camera");
+			if (camNode) {
+				cam = camNode->GetComponent<Camera>();
+			}
+			if (!cam)
+				return;
+		}
 
 		IntVector2 terrainsize = (terrain_->GetNumPatches() * terrain_->GetPatchSize());
 		IntVector2 cellsize = terrainsize / 4;
 
-		Camera *cam = viewport->GetCamera();
+		if (!cam)
+			cam = viewport->GetCamera();
 		if (cam) {
 			Vector3 campos = cam->GetNode()->GetPosition();
 			campos.y_ = 0;
-
+			//ATOMIC_LOGDEBUG(campos.ToString());
 			IntVector2 campos2d = IntVector2(campos.x_, campos.z_);
 
 
@@ -241,15 +251,15 @@ namespace Atomic
 				//	}
 				//}
 
-				//DrawGrass(sector, cellsize);
-				//DrawGrass(sector + IntVector2(1,1), cellsize);
-				//DrawGrass(sector + IntVector2(1, -1), cellsize);
-				//DrawGrass(sector + IntVector2(-1, 1), cellsize);
-				//DrawGrass(sector + IntVector2(-1, -1), cellsize);
-				//DrawGrass(sector + IntVector2(1, 0), cellsize);
-				//DrawGrass(sector + IntVector2(0, 1), cellsize);
-				//DrawGrass(sector + IntVector2(-1, 0), cellsize);
-				//DrawGrass(sector + IntVector2(0, -1), cellsize);
+				DrawGrass(sector, cellsize);
+				DrawGrass(sector + IntVector2(1,1), cellsize);
+				DrawGrass(sector + IntVector2(1, -1), cellsize);
+				DrawGrass(sector + IntVector2(-1, 1), cellsize);
+				DrawGrass(sector + IntVector2(-1, -1), cellsize);
+				DrawGrass(sector + IntVector2(1, 0), cellsize);
+				DrawGrass(sector + IntVector2(0, 1), cellsize);
+				DrawGrass(sector + IntVector2(-1, 0), cellsize);
+				DrawGrass(sector + IntVector2(0, -1), cellsize);
 			}
 		}
 	}
@@ -453,7 +463,9 @@ namespace Atomic
 			PRotScale qp;
 
 
-			qp.pos = (node_->GetRotation().Inverse() * Vector3(Random((float)cellsize.x_), 0.0f, Random((float)cellsize.y_))) + (node_->GetRotation().Inverse() * position);
+			//qp.pos = (node_->GetRotation().Inverse() * Vector3(Random((float)cellsize.x_), 0.0f, Random((float)cellsize.y_))) + (node_->GetRotation().Inverse() * position);
+			qp.pos = Vector3(sector.x_ * Random((float)cellsize.x_), 0.0f, sector.y_ * Random((float)cellsize.y_));
+			qp.pos += position + terrain_->GetNode()->GetWorldPosition();
 			//IntVector2 splatpos = terrain_->WorldToHeightMap(qp.pos);
 
 			//Vector3 rotatedpos = rot.Inverse() * qp.pos;
@@ -465,13 +477,13 @@ namespace Atomic
 
 			Color pixel = splatmap->GetPixel(ix, iy);
 
-			if (splatmap && pixel.b_ > pixel.r_ & pixel.b_ > pixel.g_)
-			{
+			//if (splatmap && pixel.b_ > pixel.r_ & pixel.b_ > pixel.g_)
+			//{
 				qp.rot = Quaternion(0.0f, Random(360.0f), 0.0f);
-				qp.pos.y_ = terrain_->GetHeight(node_->GetRotation() * qp.pos) - 0.2f;
+				qp.pos.y_ += terrain_->GetHeight(qp.pos); //node_->GetRotation() * qp.pos) - 0.2f;
 				qp.scale = 1.0f + Random(1.8f);
 				qpList_.Push(qp);
-			}
+			//}
 		}
 
 		if (qpList_.Size() < 1)
@@ -481,13 +493,19 @@ namespace Atomic
 		}
 
 		Model *pModel = cache->GetResource<Model>("Models/Veg/vegbrush.mdl");
+		if (!pModel)
+		{
+			ATOMIC_LOGERROR("Foliage system couldn't find Models / Veg / vegbrush.mdl");
+			return;
+		}
 		SharedPtr<Model> cloneModel = pModel->Clone();
 
 
 		Node *grassnode = node_->CreateChild();
 		GeomReplicator *grass = grassnode->CreateComponent<GeomReplicator>();
 		grass->SetModel(cloneModel);
-		grass->SetMaterial(cache->GetResource<Material>("Models/Veg/veg-alphamask.xml"));
+		//grass->SetMaterial(cache->GetResource<Material>("Models/Veg/veg-alphamask.material"));
+		grass->SetMaterial(cache->GetResource<Material>("Models/Veg/trees-alphamask.material"));
 
 		Vector3 lightDir(0.6f, -1.0f, 0.8f);
 
@@ -509,8 +527,8 @@ namespace Atomic
 		// specify the cycle timer
 		float cycleTimer = 1.4f;
 
-		grass->ConfigWindVelocity(topVerts, batchCount, windVel, cycleTimer);
-		grass->WindAnimationEnabled(true);
+		//grass->ConfigWindVelocity(topVerts, batchCount, windVel, cycleTimer);
+		//grass->WindAnimationEnabled(true);
 
 		vegReplicators_.InsertNew(sector, grass);
 

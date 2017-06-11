@@ -999,6 +999,11 @@ VariantMap Engine::ParseParameters(const Vector<String>& arguments)
             {
                 ret[EP_AUTO_METRICS] = true;
             }
+			else if (argument == "externalwindow" && !value.Empty())
+			{
+				ret[EP_EXTERNAL_WINDOW] = ToInt(value);
+				++i;
+			}
             // ATOMIC END
 #ifdef ATOMIC_TESTING
             else if (argument == "timeout" && !value.Empty())

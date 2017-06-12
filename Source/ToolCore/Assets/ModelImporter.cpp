@@ -63,7 +63,7 @@ void ModelImporter::SetDefaults()
     SharedPtr<OpenAssetImporter> importer(new OpenAssetImporter(context_));
 
     scale_ = 1.0;
-    importAnimations_ = false;
+    importAnimations_ = true;
     importMaterials_ = importer->GetImportMaterialsDefault();
     includeNonSkinningBones_ = importer->GetIncludeNonSkinningBones();
     animationInfo_.Clear();

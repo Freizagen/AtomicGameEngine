@@ -652,7 +652,7 @@ String AssetDatabase::GetResourceImporterName(const String& resourceTypeName)
         resourceTypeToImporterType_["JSONFile"] = "JSONImporter";
         resourceTypeToImporterType_["ParticleEffect2D"] = "PEXImporter";
         resourceTypeToImporterType_["ParticleEffect"] = "ParticleEffectImporter";
-
+        resourceTypeToImporterType_["TextureCube"] = "TextImporter";
         resourceTypeToImporterType_["Animation"] = "ModelImporter";
 
         resourceTypeToImporterType_["CSComponentAssembly"] = "NETAssemblyImporter";

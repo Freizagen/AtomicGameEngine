@@ -318,7 +318,7 @@ bool Asset::CreateImporter()
         {
             importer_ = new ParticleEffectImporter(context_, this);
         }
-        else if (ext == ".txt" || ext == ".xml" || ext == ".hlsl" || ext == ".glsl")
+        else if (ext == ".txt" || ext == ".xml" || ext == ".hlsl" || ext == ".glsl" || ext == ".cubemap")
         {
             importer_ = new TextImporter(context_, this);
         }

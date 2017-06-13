@@ -1359,7 +1359,7 @@ bool OpenAssetImporter::BuildAndSaveMaterial(aiMaterial* material, HashSet<Strin
 	uOffsetElem.SetString("name", "UOffset");
 	uOffsetElem.SetVector4("value", Vector4(1, 0, 0, 0));
 	XMLElement vOffsetElem = materialElem.CreateChild("parameter");
-	vOffsetElem.SetString("name", "UOffset");
+	vOffsetElem.SetString("name", "VOffset");
 	vOffsetElem.SetVector4("value", Vector4(0, 1, 0, 0));
 
 

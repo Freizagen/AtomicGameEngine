@@ -93,7 +93,7 @@ void Gizmo3D::Position()
 	Input* input = GetSubsystem<Input>();
 	Ray camRay = view3D_->GetCameraRay();
 	PODVector<RayQueryResult> result_;
-	if (input->GetKeyDown(Atomic::KEY_L)) {
+	if (input->GetKeyDown(Atomic::KEY_L && view3D_->MouseInView())) {
 
 		RayOctreeQuery query(result_, camRay, RAY_TRIANGLE, view3D_->GetCamera()->GetFarClip(), DRAWABLE_GEOMETRY);
 		view3D_->GetOctree()->Raycast(query);

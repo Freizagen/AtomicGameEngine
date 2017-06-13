@@ -78,12 +78,13 @@ bool ModelImporter::ImportModel()
     SharedPtr<OpenAssetImporter> importer(new OpenAssetImporter(context_));
 
     importer->SetVerboseLog(true);
-	importer->SetMaxBones(256);
+	importer->SetMaxBones(512);
     importer->SetScale(scale_);
-    importer->SetExportAnimations(false);
+    importer->SetExportAnimations(true);
     importer->SetImportNode(importNode_);
     importer->SetImportMaterials(importMaterials_);
-    importer->SetIncludeNonSkinningBones(includeNonSkinningBones_);
+    //importer->SetIncludeNonSkinningBones(includeNonSkinningBones_);
+	importer->SetIncludeNonSkinningBones(true);
 
     if (importer->Load(asset_->GetPath()))
     {

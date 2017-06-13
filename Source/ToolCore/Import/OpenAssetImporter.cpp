@@ -75,7 +75,7 @@ OpenAssetImporter::OpenAssetImporter(Context* context) : Object(context) ,
     checkUniqueModel_(true),
     useVertexColors_(false),
     scale_(1.0f),
-    maxBones_(64),
+    maxBones_(512),
     defaultTicksPerSecond_(4800.0f),
     startTime_(-1),
     endTime_(-1)
@@ -594,23 +594,30 @@ String OpenAssetImporter::GenerateMaterialName(aiMaterial* material)
 
 String OpenAssetImporter::GetMaterialTextureName(const String& nameIn)
 {
+
+	String path = String::EMPTY;
+	if (sourceAssetPath_.Length() > 10);
+	    path = sourceAssetPath_.Substring(sourceAssetPath_.Find("Resources") + 10);
     // Detect assimp embedded texture
     if (nameIn.Length() && nameIn[0] == '*')
         return GenerateTextureName(ToInt(nameIn.Substring(1)));
     else
-        return (useSubdirs_ ? "Textures/" : "") + nameIn;
+        return (useSubdirs_ ? (path + "Textures/") : "") + nameIn;
 }
 
 String OpenAssetImporter::GenerateTextureName(unsigned texIndex)
 {
     if (texIndex < scene_->mNumTextures)
     {
+		String path = String::EMPTY;
+		if (sourceAssetPath_.Length() > 10);
+	    	path = sourceAssetPath_.Substring(sourceAssetPath_.Find("Resources") + 9);
         // If embedded texture contains encoded data, use the format hint for file extension. Else save RGBA8 data as PNG
         aiTexture* tex = scene_->mTextures[texIndex];
         if (!tex->mHeight)
-            return (useSubdirs_ ? "Textures/" : "") + inputName_ + "_Texture" + String(texIndex) + "." + tex->achFormatHint;
+            return (useSubdirs_ ? (path + "Textures/") : "") + inputName_ + "_Texture" + String(texIndex) + "." + tex->achFormatHint;
         else
-            return (useSubdirs_ ? "Textures/" : "") + inputName_ + "_Texture" + String(texIndex) + ".png";
+            return (useSubdirs_ ? (path + "Textures/") : "") + inputName_ + "_Texture" + String(texIndex) + ".png";
     }
 
     // Should not go here
@@ -1199,6 +1206,7 @@ void OpenAssetImporter::ExportMaterials(HashSet<String>& usedTextures)
         if (useSubdirs_)
         {
             context_->GetSubsystem<FileSystem>()->CreateDir(sourceAssetPath_ + "Materials");
+			context_->GetSubsystem<FileSystem>()->CreateDir(sourceAssetPath_ + "Textures");
         }
 
         for (unsigned i = 0; i < scene_->mNumMaterials; ++i)
@@ -1346,6 +1354,14 @@ bool OpenAssetImporter::BuildAndSaveMaterial(aiMaterial* material, HashSet<Strin
         emissiveElem.SetString("name", GetMaterialTextureName(emissiveTexName));
         usedTextures.Insert(emissiveTexName);
     }
+
+	XMLElement uOffsetElem = materialElem.CreateChild("parameter");
+	uOffsetElem.SetString("name", "UOffset");
+	uOffsetElem.SetVector4("value", Vector4(1, 0, 0, 0));
+	XMLElement vOffsetElem = materialElem.CreateChild("parameter");
+	vOffsetElem.SetString("name", "UOffset");
+	vOffsetElem.SetVector4("value", Vector4(0, 1, 0, 0));
+
 
     XMLElement diffuseColorElem = materialElem.CreateChild("parameter");
     diffuseColorElem.SetString("name", "MatDiffColor");

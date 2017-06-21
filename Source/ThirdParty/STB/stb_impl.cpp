@@ -1,5 +1,5 @@
 //
-// Copyright (c) 2014-2016, THUNDERBEAST GAMES LLC All rights reserved
+// Copyright (c) 2017 the Atomic project.
 //
 // Permission is hereby granted, free of charge, to any person obtaining a copy
 // of this software and associated documentation files (the "Software"), to deal
@@ -19,40 +19,23 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 //
+#define STB_RECT_PACK_IMPLEMENTATION 1
+#include "stb_rect_pack.h"
 
-#pragma once
+#define STB_IMAGE_IMPLEMENTATION 1
+#include "stb_image.h"
 
-#include <Atomic/Core/Object.h>
+#define STB_IMAGE_WRITE_IMPLEMENTATION 1
+#include "stb_image_write.h"
 
-using namespace Atomic;
+#undef STB_VORBIS_HEADER_ONLY
+#include "stb_vorbis.h"
 
-namespace AtomicPlayer
-{
-    ATOMIC_EVENT(E_PLAYERSCENELOADBEGIN, PlayerSceneLoadBegin)
-    {
-        ATOMIC_PARAM(P_SCENE, Scene);        // Scene
-    }
+#define STB_TRUETYPE_IMPLEMENTATION 1
+#include "stb_truetype.h"
 
-    ATOMIC_EVENT(E_PLAYERSCENELOADEND, PlayerSceneLoadEnd)
-    {
-        ATOMIC_PARAM(P_SCENE, Scene);       // Scene
-        ATOMIC_PARAM(P_SUCCESS, Success);   // bool
-    }
+// So far only imgui is using textedit. Also use of this header requires extensive configuration. Due to these reasons
+// header implementation is not enabled here until other parts of project require it.
+//#define STB_TEXTEDIT_IMPLEMENTATION 1
+//#include "stb_textedit.h"
 
-	ATOMIC_EVENT(E_PLAYERSCENELOADASYNCBEGIN, PlayerSceneLoadAsyncBegin)
-	{
-		ATOMIC_PARAM(P_SCENE, Scene);        // Scene
-	}
-
-	ATOMIC_EVENT(E_PLAYERSCENELOADASYNCEND, PlayerSceneLoadAsyncEnd)
-	{
-		ATOMIC_PARAM(P_SCENE, Scene);       // Scene
-		ATOMIC_PARAM(P_SUCCESS, Success);   // bool
-	}
-
-    ATOMIC_EVENT(E_PLAYERSCENEUNLOAD, PlayerSceneUnload)
-    {
-        ATOMIC_PARAM(P_SCENE, Scene);       // Scene
-    }
-
-}

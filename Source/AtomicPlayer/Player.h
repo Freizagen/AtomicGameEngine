@@ -45,6 +45,9 @@ public:
     /// Load a scene file with optional camera specified
     Scene* LoadScene(const String& filename, Camera* camera = NULL);
 
+	/// Load a scene file asynchronously with optional camera specified
+	Scene* LoadSceneAsync(const String& filename, Camera* camera = NULL);
+
     /// Get the number of currently loaded scenes
     unsigned GetNumScenes() { return loadedScenes_.Size();  }
 

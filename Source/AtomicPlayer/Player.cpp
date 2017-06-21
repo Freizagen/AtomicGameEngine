@@ -57,6 +57,47 @@ void Player::HandleExitRequested(StringHash eventType, VariantMap& eventData)
 
 Scene* Player::LoadScene(const String& filename, Camera *camera)
 {
+	ResourceCache* cache = GetSubsystem<ResourceCache>();
+	SharedPtr<File> file = cache->GetFile(filename);
+
+	if (!file || !file->IsOpen())
+	{
+		return 0;
+	}
+
+	Scene* scene = new Scene(context_);
+
+	VariantMap eventData;
+
+	eventData[PlayerSceneLoadBegin::P_SCENE] = scene;
+
+	scene->SendEvent(E_PLAYERSCENELOADBEGIN, eventData);
+
+	if (!scene->LoadXML(*file))
+	{
+		eventData[PlayerSceneLoadEnd::P_SCENE] = scene;
+		eventData[PlayerSceneLoadEnd::P_SUCCESS] = false;
+		scene->SendEvent(E_PLAYERSCENELOADEND, eventData);
+		scene->ReleaseRef();
+		return 0;
+	}
+
+	eventData[PlayerSceneLoadEnd::P_SCENE] = scene;
+	eventData[PlayerSceneLoadEnd::P_SUCCESS] = true;
+	scene->SendEvent(E_PLAYERSCENELOADEND, eventData);
+
+	loadedScenes_.Push(SharedPtr<Scene>(scene));
+
+	if (currentScene_.Null())
+	{
+		SetCurrentScene(scene, camera);
+	}
+
+	return scene;
+}
+
+Scene* Player::LoadSceneAsync(const String& filename, Camera *camera)
+{
     ResourceCache* cache = GetSubsystem<ResourceCache>();
     SharedPtr<File> file = cache->GetFile(filename);
 
@@ -69,22 +110,22 @@ Scene* Player::LoadScene(const String& filename, Camera *camera)
 
     VariantMap eventData;
 
-    eventData[PlayerSceneLoadBegin::P_SCENE] = scene;
+    eventData[PlayerSceneLoadAsyncBegin::P_SCENE] = scene;
 
-    scene->SendEvent(E_PLAYERSCENELOADBEGIN, eventData);
+    scene->SendEvent(E_PLAYERSCENELOADASYNCBEGIN, eventData);
 
-    if (!scene->LoadXML(*file))
+    if (!scene->LoadAsyncXML(file))
     {
-        eventData[PlayerSceneLoadEnd::P_SCENE] = scene;
-        eventData[PlayerSceneLoadEnd::P_SUCCESS] = false;
-        scene->SendEvent(E_PLAYERSCENELOADEND, eventData);
+        eventData[PlayerSceneLoadAsyncEnd::P_SCENE] = scene;
+        eventData[PlayerSceneLoadAsyncEnd::P_SUCCESS] = false;
+        scene->SendEvent(E_PLAYERSCENELOADASYNCEND, eventData);
         scene->ReleaseRef();
         return 0;
     }
 
-    eventData[PlayerSceneLoadEnd::P_SCENE] = scene;
-    eventData[PlayerSceneLoadEnd::P_SUCCESS] = true;
-    scene->SendEvent(E_PLAYERSCENELOADEND, eventData);
+    eventData[PlayerSceneLoadAsyncEnd::P_SCENE] = scene;
+    eventData[PlayerSceneLoadAsyncEnd::P_SUCCESS] = true;
+    scene->SendEvent(E_PLAYERSCENELOADASYNCEND, eventData);
 
     loadedScenes_.Push(SharedPtr<Scene>(scene));
 

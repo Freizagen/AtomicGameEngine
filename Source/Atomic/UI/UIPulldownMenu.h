@@ -1,5 +1,5 @@
 //
-// Copyright (c) 2014-2016, THUNDERBEAST GAMES LLC All rights reserved
+// Copyright (c) 2017, THUNDERBEAST GAMES LLC All rights reserved
 //
 // Permission is hereby granted, free of charge, to any person obtaining a copy
 // of this software and associated documentation files (the "Software"), to deal
@@ -22,37 +22,30 @@
 
 #pragma once
 
-#include <Atomic/Core/Object.h>
+#include "UISelectItem.h"
+#include "UIButton.h"
 
-using namespace Atomic;
-
-namespace AtomicPlayer
+namespace Atomic
 {
-    ATOMIC_EVENT(E_PLAYERSCENELOADBEGIN, PlayerSceneLoadBegin)
-    {
-        ATOMIC_PARAM(P_SCENE, Scene);        // Scene
-    }
 
-    ATOMIC_EVENT(E_PLAYERSCENELOADEND, PlayerSceneLoadEnd)
-    {
-        ATOMIC_PARAM(P_SCENE, Scene);       // Scene
-        ATOMIC_PARAM(P_SUCCESS, Success);   // bool
-    }
+class ATOMIC_API UIPulldownMenu : public UIButton
+{
+    ATOMIC_OBJECT(UIPulldownMenu, UIButton)
 
-	ATOMIC_EVENT(E_PLAYERSCENELOADASYNCBEGIN, PlayerSceneLoadAsyncBegin)
-	{
-		ATOMIC_PARAM(P_SCENE, Scene);        // Scene
-	}
+public:
 
-	ATOMIC_EVENT(E_PLAYERSCENELOADASYNCEND, PlayerSceneLoadAsyncEnd)
-	{
-		ATOMIC_PARAM(P_SCENE, Scene);       // Scene
-		ATOMIC_PARAM(P_SUCCESS, Success);   // bool
-	}
+    UIPulldownMenu(Context* context, bool createWidget = true);
+    virtual ~UIPulldownMenu();
 
-    ATOMIC_EVENT(E_PLAYERSCENEUNLOAD, PlayerSceneUnload)
-    {
-        ATOMIC_PARAM(P_SCENE, Scene);       // Scene
-    }
+    void SetSource(UISelectItemSource* source); /// for programming the pulled down menu
+
+    const String& GetSelectedId(); /// return id of entry selected in menu
+
+protected:
+
+    virtual bool OnEvent(const tb::TBWidgetEvent &ev);
+    String sid_;  /// cached selected item tbid
+
+};
 
 }

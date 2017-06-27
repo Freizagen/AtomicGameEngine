@@ -64,22 +64,20 @@ namespace Atomic
 		/// Register object factory. Drawable must be registered first.
 		static void RegisterObject(Context* context);
 
-		void DrawGrass(IntVector2 sector, IntVector2 cellsize);
-		void DrawTrees(IntVector2 sector, IntVector2 cellsize);
+		void DrawGrass();
+		//void DrawTrees(IntVector2 sector, IntVector2 cellsize);
 
 	protected:
 
 		bool initialized_;
 		//void ApplyAttributes();
-		void HandleComponentRemoved(StringHash eventType, VariantMap& eventData);
-		void HandleDrawableUpdateFinished(StringHash eventType, VariantMap& eventData);
+	//	void HandleComponentRemoved(StringHash eventType, VariantMap& eventData);
+	//	void HandleDrawableUpdateFinished(StringHash eventType, VariantMap& eventData);
 		void HandlePostUpdate(StringHash eventType, VariantMap& eventData);
 		void OnNodeSet(Node* node);
 
 		void Initialize();
-		//	void OnNodeSet(Node* node);
-		/// Handle enabled/disabled state change.
-		virtual void OnSetEnabled();
+	//	virtual void OnSetEnabled();
 		//Grass stuff
 		HashMap<IntVector2, GeomReplicator*> vegReplicators_;
 		HashMap<IntVector2, TreeBillboardSet*> treeTreeBillboards_;
@@ -89,7 +87,7 @@ namespace Atomic
 		bool sectorSet_;
 
 		Vector2 CustomWorldToNormalized(Image *height, Terrain *terrain, Vector3 world);
-		void FoliageSystem::CreateTreeBillboard(Model *model);
+	//	void FoliageSystem::CreateTreeBillboard(Model *model);
 		Image* billboardImage_;
 		int billboardSize_;
 		float boundingRadiusFromAABB(BoundingBox& bb);

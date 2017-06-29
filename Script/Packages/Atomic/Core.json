@@ -47,7 +47,7 @@
 			"subscribeToEvent(sender:AObject, eventMetaData:Atomic.EventMetaData);"
 		],
 		"Profiler" : [
-			"beginBlock(name:string, filename:string, line:number, argb?:number, status?:Atomic.ProfilerBlockStatus );"
+			"beginBlock(name:string, argb?:number, status?:Atomic.ProfilerBlockStatus );"
 		]
 	},
 	"haxe_decl" : {

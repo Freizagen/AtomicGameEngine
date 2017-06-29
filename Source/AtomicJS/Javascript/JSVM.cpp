@@ -499,6 +499,10 @@ bool JSVM::ExecuteScript(const String& scriptPath)
         if (duk_is_object(ctx_, -1))
             SendJSErrorEvent(path);
 
+        // store the (standard) fileName for tracebacks, callstack analysis, etc
+        duk_push_string(ctx_, file->GetFullPath().CString());
+        duk_put_prop_string(ctx_, -2, "fileName");
+
         duk_pop(ctx_);
         return false;
     }
@@ -523,6 +527,10 @@ bool JSVM::ExecuteFile(File *file)
         DUK_COMPILE_EVAL | DUK_COMPILE_SAFE | DUK_COMPILE_NOSOURCE | DUK_COMPILE_STRLEN) != 0)
     {
         SendJSErrorEvent(file->GetFullPath());
+
+        // store the (standard) fileName for tracebacks, callstack analysis, etc
+        duk_push_string(ctx_, file->GetFullPath().CString());
+        duk_put_prop_string(ctx_, -2, "fileName");
 
         duk_pop(ctx_);
         return false;

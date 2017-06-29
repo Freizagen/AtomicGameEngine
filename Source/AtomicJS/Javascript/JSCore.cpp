@@ -243,20 +243,39 @@ static int Profiler_BeginBlock(duk_context* ctx)
     // get the number of args
     duk_idx_t top = duk_get_top(ctx);
 
-    // we need at least 3
-    if ( top < 3)
+    // we need at least 1
+    if ( top < 1)
     {
         return 0;
     }
 
+    // query callstack
+    String fileName;
+    int lineNumber;
+
+    duk_inspect_callstack_entry(ctx, -2);
+    duk_get_prop_string(ctx, -1, "function");
+    if (duk_is_object(ctx, -1))
+    {
+        duk_get_prop_string(ctx, -1, "fileName");
+        fileName = duk_to_string(ctx, -1);
+        duk_get_prop_string(ctx, -2, "lineNumber");
+        lineNumber = duk_to_int(ctx, -1);
+        duk_pop_2(ctx);
+    }
+    else
+    {
+        fileName = "#ErrorInspectingCallstack#";
+        lineNumber = 0;
+    }
+    duk_pop_2(ctx);
+
     // parse args
     const char* name = duk_require_string(ctx, 0);
-    const char* filename = duk_require_string(ctx, 1);
-    int line = duk_require_number(ctx, 2);
-    unsigned argb = (top > 3) ? (unsigned) duk_require_number(ctx, 3) : PROFILER_COLOR_DEFAULT;
-    unsigned char status = (top > 4) ? (unsigned) duk_require_number(ctx, 4) : ProfilerBlockStatus::ON;
+    unsigned argb = (top > 1) ? (unsigned) duk_require_number(ctx, 1) : PROFILER_COLOR_DEFAULT;
+    unsigned char status = (top > 2) ? (unsigned) duk_require_number(ctx, 2) : ProfilerBlockStatus::ON;
 
-    profiler->BeginBlock(name, filename, line, argb, status);
+    profiler->BeginBlock(name, fileName.CString(), lineNumber, argb, status);
 
 #else
     static bool warned = false;

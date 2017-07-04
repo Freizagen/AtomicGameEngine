@@ -1,5 +1,5 @@
 //
-// Copyright (c) 2008-2017 the Urho3D project.
+// Copyright (c) 2014-2015, THUNDERBEAST GAMES LLC All rights reserved
 //
 // Permission is hereby granted, free of charge, to any person obtaining a copy
 // of this software and associated documentation files (the "Software"), to deal
@@ -20,26 +20,37 @@
 // THE SOFTWARE.
 //
 
-#include "../Precompiled.h"
+#include <TurboBadger/tb_widgets.h>
+#include <TurboBadger/tb_widgets_common.h>
 
-#include "../Core/EventProfiler.h"
+#include <Atomic/IO/Log.h>
 
-#include "../DebugNew.h"
+#include "UIEvents.h"
+#include "UI.h"
+#include "UIRadioButton.h"
+
+using namespace tb;
 
 namespace Atomic
 {
 
-bool EventProfiler::active = false;
-
-EventProfiler::EventProfiler(Context* context) :
-    Profiler(context)
+UIRadioButton::UIRadioButton(Context* context, bool createWidget) : UIWidget(context, false)
 {
-    // FIXME: Is there a cleaner way?
-    delete root_;
-    current_ = root_ = new EventProfilerBlock(0, "RunFrame");
-    delete [] root_->name_;
-    root_->name_ = new char[sizeof("RunFrame")];
-    memcpy(root_->name_, "RunFrame", sizeof("RunFrame"));
+    if (createWidget)
+    {
+        widget_ = new TBRadioButton();
+        widget_->SetDelegate(this);
+        GetSubsystem<UI>()->WrapWidget(this, widget_);
+    }
+}
+
+UIRadioButton::~UIRadioButton()
+{
+}
+
+bool UIRadioButton::OnEvent(const tb::TBWidgetEvent &ev)
+{
+    return UIWidget::OnEvent(ev);
 }
 
 }

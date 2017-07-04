@@ -25,7 +25,10 @@
 #include "../Audio/Audio.h"
 #include "../Core/Context.h"
 #include "../Core/CoreEvents.h"
-#include "../Core/EventProfiler.h"
+// ATOMIC BEGIN
+#include "../Core/Profiler.h"
+#include "../Engine/EngineDefs.h"
+// ATOMIC END
 #include "../Core/ProcessUtils.h"
 #include "../Core/WorkQueue.h"
 #include "../Engine/Engine.h"
@@ -42,6 +45,9 @@
 
 // ATOMIC BEGIN
 #include "../Resource/XMLFile.h"
+#include "../UI/SystemUI/SystemUI.h"
+#include "../UI/SystemUI/Console.h"
+#include "../UI/SystemUI/DebugHud.h"
 // ATOMIC END
 
 #ifdef ATOMIC_NAVIGATION
@@ -181,6 +187,31 @@ Engine::Engine(Context* context) :
     // ATOMIC BEGIN        
     SubscribeToEvent(E_PAUSERESUMEREQUESTED, ATOMIC_HANDLER(Engine, HandlePauseResumeRequested));
     SubscribeToEvent(E_PAUSESTEPREQUESTED, ATOMIC_HANDLER(Engine, HandlePauseStepRequested));
+
+    context_->engine_ = context_->GetSubsystem<Engine>();
+    context_->time_ = context_->GetSubsystem<Time>();
+    context_->workQueue_ = context_->GetSubsystem<WorkQueue>();
+#ifdef ATOMIC_PROFILING
+    context_->profiler_ = context_->GetSubsystem<Profiler>();
+#endif
+    context_->fileSystem_ = context_->GetSubsystem<FileSystem>();
+#ifdef ATOMIC_LOGGING
+    context_->log_ = context_->GetSubsystem<Log>();
+#endif
+    context_->cache_ = context_->GetSubsystem<ResourceCache>();
+    context_->l18n_ = context_->GetSubsystem<Localization>();
+#ifdef ATOMIC_NETWORK
+    context_->network_ = context_->GetSubsystem<Network>();
+#endif
+#ifdef ATOMIC_WEB
+    context_->web_ = context_->GetSubsystem<Web>();
+#endif
+#ifdef ATOMIC_DATABASE
+    context_->db_ = context_->GetSubsystem<Database>();
+#endif
+    context_->input_ = context_->GetSubsystem<Input>();
+    context_->audio_ = context_->GetSubsystem<Audio>();
+    context_->ui_ = context_->GetSubsystem<UI>();
     // ATOMIC END
 }
 
@@ -203,6 +234,10 @@ bool Engine::Initialize(const VariantMap& parameters)
     {
         context_->RegisterSubsystem(new Graphics(context_));
         context_->RegisterSubsystem(new Renderer(context_));
+        // ATOMIC BEGIN
+        context_->graphics_ = context_->GetSubsystem<Graphics>();
+        context_->renderer_ = context_->GetSubsystem<Renderer>();
+        // ATOMIC END
     }
     else
     {
@@ -338,12 +373,27 @@ bool Engine::Initialize(const VariantMap& parameters)
 #endif
 
 #ifdef ATOMIC_PROFILING
-    if (GetParameter(parameters, EP_EVENT_PROFILER, true).GetBool())
+    // ATOMIC BEGIN
+    if (Profiler* profiler = GetSubsystem<Profiler>())
     {
-        context_->RegisterSubsystem(new EventProfiler(context_));
-        EventProfiler::SetActive(true);
+        if (GetParameter(parameters, EP_PROFILER_LISTEN, false).GetBool())
+            profiler->StartListen((unsigned short)GetParameter(parameters, EP_PROFILER_PORT, PROFILER_DEFAULT_PORT).GetInt());
+        profiler->SetEventProfilingEnabled(GetParameter(parameters, EP_EVENT_PROFILER, true).GetBool());
     }
+    // ATOMIC END
 #endif
+
+    // ATOMIC BEGIN
+    if (!headless_)
+    {
+        context_->RegisterSubsystem(new SystemUI(context_));
+        context_->systemUi_ = context_->GetSubsystem<SystemUI>();
+        context_->console_ = context_->GetSubsystem<Console>();
+        context_->debugHud_ = context_->GetSubsystem<DebugHud>();
+    }
+    context_->metrics_ = context_->GetSubsystem<Metrics>();
+    // ATOMIC END
+
     frameTimer_.Reset();
 
     ATOMIC_LOGINFO("Initialized engine");
@@ -509,8 +559,10 @@ bool Engine::InitializeResourceCache(const VariantMap& parameters, bool removeOl
     return true;
 }
 
+// ATOMIC BEGIN
 void Engine::RunFrame()
 {
+    ATOMIC_PROFILE(RunFrame);
     assert(initialized_);
 
     // If not headless, and the graphics subsystem no longer has a window open, assume we should exit
@@ -526,18 +578,8 @@ void Engine::RunFrame()
     Input* input = GetSubsystem<Input>();
     Audio* audio = GetSubsystem<Audio>();
 
-#ifdef ATOMIC_PROFILING
-    if (EventProfiler::IsActive())
-    {
-        EventProfiler* eventProfiler = GetSubsystem<EventProfiler>();
-        if (eventProfiler)
-            eventProfiler->BeginFrame();
-    }
-#endif
-
+    ATOMIC_PROFILE(DoFrame);
     time->BeginFrame(timeStep_);
-
-    // ATOMIC BEGIN
     // check for exit again that comes in thru an event handler
     if ( exiting_ ) // needed to prevent scripts running the 
         return;     // current frame update with null objects
@@ -576,13 +618,13 @@ void Engine::RunFrame()
         fpsFramesSinceUpdate_ = 0;
         fpsTimeSinceUpdate_ = 0;
     }
-    // ATOMIC END
-
     Render();
+    ATOMIC_PROFILE_END();
     ApplyFrameLimit();
 
     time->EndFrame();
 }
+// ATOMIC END
 
 Console* Engine::CreateConsole()
 {
@@ -643,18 +685,6 @@ void Engine::Exit()
     // On iOS it's not legal for the application to exit on its own, instead it will be minimized with the home key
 #else
     DoExit();
-#endif
-}
-
-void Engine::DumpProfiler()
-{
-#ifdef ATOMIC_LOGGING
-    if (!Thread::IsMainThread())
-        return;
-
-    Profiler* profiler = GetSubsystem<Profiler>();
-    if (profiler)
-        ATOMIC_LOGRAW(profiler->PrintData(true, true) + "\n");
 #endif
 }
 

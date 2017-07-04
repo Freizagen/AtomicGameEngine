@@ -39,6 +39,10 @@ public:
 
     void SetLimits(double minimum, double maximum);
 
+	/// set and get the inc, dec step size
+    void SetStepSize(double step);
+    double GetStepSize();
+
     void SetEditFieldLayoutParams(UILayoutParams* params);
 
 protected:

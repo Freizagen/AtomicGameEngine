@@ -51,7 +51,7 @@
 
 namespace Atomic
 {
-
+#define GRASS_VIEWMASK 128;
 	extern const char* GEOMETRY_CATEGORY;
 
 	FoliageSystem::FoliageSystem(Context *context) : Component(context)
@@ -88,6 +88,7 @@ namespace Atomic
 	{
 		if (!initialized_) {
 			Initialize();
+			UnsubscribeFromAllEvents();
 		}
 
 
@@ -106,7 +107,7 @@ namespace Atomic
 		terrain_ = GetScene()->GetComponent<Terrain>(true);
 
 		//if (terrains.Size() > 0)
-		if(terrain_ && terrain_->GetHeight(terrain_->GetNode()->GetWorldPosition()) > 1)
+		if(terrain_ && terrain_->GetHeightData() != nullptr)
 		{
 			initialized_ = true;
 			//terrain_ = terrains[0];
@@ -168,7 +169,7 @@ namespace Atomic
 
 
 	void FoliageSystem::DrawGrass() {
-		const unsigned NUM_OBJECTS = 1000000;
+		const unsigned NUM_OBJECTS = 2000000;
 
 		if (!terrain_) {
 			ATOMIC_LOGERROR("Foliage system couldn't find terrain");
@@ -202,11 +203,18 @@ namespace Atomic
 			qp.pos = Vector3(Random(size) - size/2, 0.0f, Random(size) - size / 2);
 		
 				qp.rot = Quaternion(0.0f, Random(360.0f), 0.0f);
-				qp.pos.y_ = terrain_->GetHeight(terrainpos + (rot * qp.pos));
+				qp.pos.y_ = terrain_->GetHeight(terrainpos + (rot * qp.pos)) - 0.2f;
 				//ATOMIC_LOGERROR("TERRAIN IS "  + (String)terrain_->GetHeight(terrainpos) + " AT " + terrainpos.ToString());
 
-				qp.scale = 1.0f + Random(1.8f);
+				qp.scale = 0.5f + Random(1.0f);
 				qpList_.Push(qp);
+				PRotScale qp2;
+				qp2.pos = qp.pos;
+				qp2.scale = qp.scale;
+				Quaternion ninety;
+				ninety.FromEulerAngles(0, 90, 0);
+				qp2.rot = qp.rot + ninety;
+				qpList_.Push(qp2);
 		}
 
 		if (qpList_.Size() < 1)
@@ -228,7 +236,10 @@ namespace Atomic
 		GeomReplicator *grass = grassnode->CreateComponent<GeomReplicator>();
 		grass->SetTemporary(true);
 		grass->SetModel(cloneModel);
-		grass->SetMaterial(cache->GetResource<Material>("Models/Veg/veg-alphamask.material"));
+		grass->SetMaterial(cache->GetResource<Material>("Models/Veg/grass-alphamask.material"));
+		unsigned int grassmask;
+		grassmask |= GRASS_VIEWMASK;
+		grass->SetViewMask(grassmask);
 		//grass->SetMaterial(cache->GetResource<Material>("Models/Veg/trees-alphamask.material"));
 
 		Vector3 lightDir(0.6f, -1.0f, 0.8f);
@@ -243,18 +254,17 @@ namespace Atomic
 		topVerts.Push(3);
 
 		// specify the number of geoms to update at a time
-		unsigned batchCount = 10000;
+		unsigned batchCount = 100000;
 
-		// wind velocity (breeze velocity shown)
-		Vector3 windVel(0.1f, -0.1f, 0.1f);
+		//// wind velocity (breeze velocity shown)
+		//Vector3 windVel(0.1f, -0.1f, 0.1f);
 
-		// specify the cycle timer
-		float cycleTimer = 1.4f;
+		//// specify the cycle timer
+		//float cycleTimer = 1.4f;
 
 		//grass->ConfigWindVelocity(topVerts, batchCount, windVel, cycleTimer);
 		//grass->WindAnimationEnabled(true);
 
-	//	vegReplicators_.InsertNew(sector, grass);
 
 	}
 

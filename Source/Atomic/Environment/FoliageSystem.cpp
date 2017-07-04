@@ -169,7 +169,7 @@ namespace Atomic
 
 
 	void FoliageSystem::DrawGrass() {
-		const unsigned NUM_OBJECTS = 2000000;
+		const unsigned NUM_OBJECTS = 2000;
 
 		if (!terrain_) {
 			ATOMIC_LOGERROR("Foliage system couldn't find terrain");
@@ -208,13 +208,13 @@ namespace Atomic
 
 				qp.scale = 0.5f + Random(1.0f);
 				qpList_.Push(qp);
-				PRotScale qp2;
-				qp2.pos = qp.pos;
-				qp2.scale = qp.scale;
-				Quaternion ninety;
-				ninety.FromEulerAngles(0, 90, 0);
-				qp2.rot = qp.rot + ninety;
-				qpList_.Push(qp2);
+				//PRotScale qp2;
+				//qp2.pos = qp.pos;
+				//qp2.scale = qp.scale;
+				//Quaternion ninety;
+				//ninety.FromEulerAngles(0, 90, 0);
+				//qp2.rot = qp.rot + ninety;
+				//qpList_.Push(qp2);
 		}
 
 		if (qpList_.Size() < 1)
